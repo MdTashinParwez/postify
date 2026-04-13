@@ -17,13 +17,14 @@ export default function PostForm({ post }) {
 
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userData);
+    const imageId = post?.featuredImage || post?.featureImage;
 
     const submit = async (data) => {
         if (post) {
             const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
 
-            if (file) {
-                appwriteService.deleteFile(post.featuredImage);
+            if (file && imageId) {
+                appwriteService.deleteFile(imageId);
             }
 
             const dbPost = await appwriteService.updatePost(post.$id, {
@@ -100,11 +101,13 @@ export default function PostForm({ post }) {
                 />
                 {post && (
                     <div className="w-full mb-4">
-                        <img
-                            src={appwriteService.getFilePreview(post.featuredImage)}
-                            alt={post.title}
-                            className="rounded-lg"
-                        />
+                        {imageId ? (
+                            <img
+                                src={appwriteService.getFilePreview(imageId)}
+                                alt={post.title}
+                                className="rounded-lg"
+                            />
+                        ) : null}
                     </div>
                 )}
                 <Select

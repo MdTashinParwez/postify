@@ -1,5 +1,5 @@
 import conf from '../conf/conf';
-import { Client, Databases,Storage,Query, ID } from 'appwrite';
+import { Client, Databases, Storage, Query, ID, Permission, Role } from 'appwrite';
 
 
 export class Service{
@@ -15,7 +15,7 @@ export class Service{
         this.bucket = new Storage(this.client);
     }
 
-    async createPost({title, slug, content , featureImage, status,userId }) {
+    async createPost({title, slug, content , featuredImage, status,userId }) {
         try {
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
@@ -24,7 +24,7 @@ export class Service{
                 {
                     title,
                     content,
-                    featureImage,
+                    featuredImage,
                     status,
                     userId
                 }
@@ -36,12 +36,12 @@ export class Service{
         }
     }
 
-    async updatePost(slug,{title,content , featureImage, status, }) {
+    async updatePost(slug,{title,content , featuredImage, status, }) {
         try {
             return await this.databases.updateDocument(conf.appwriteDatabaseId, conf.appwriteCollectionId, slug, {
                 title,
                 content,
-                featureImage,
+                featuredImage,
                 status,
             });
             // return document;
@@ -101,7 +101,8 @@ export class Service{
             return await this.bucket.createFile(
                 conf.appwriteBucketId,
                 ID.unique(),
-                file
+                file,
+                [Permission.read(Role.any())]
             )
         } catch (error) {
             console.log("Appwrite serive :: uploadFile :: error", error);
@@ -123,10 +124,12 @@ export class Service{
     }
 
     getFilePreview(fileId){
-        return this.bucket.getFilePreview(
+        if (!fileId) return "";
+
+        return this.bucket.getFileView(
             conf.appwriteBucketId,
             fileId
-        )
+        );
     }
 
 }

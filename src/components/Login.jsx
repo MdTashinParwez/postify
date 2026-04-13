@@ -12,13 +12,27 @@ function Login() {
     const {register, handleSubmit} = useForm()
     const [error, setError] = useState("")
 
+    const serializeUser = (userData) => ({
+        $id: userData.$id,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        emailVerification: userData.emailVerification,
+        phoneVerification: userData.phoneVerification,
+        prefs: userData.prefs,
+        accessedAt: userData.accessedAt,
+        registration: userData.registration,
+        status: userData.status,
+        labels: userData.labels,
+    })
+
     const login = async(data) => {
         setError("")
         try {
             const session = await authService.login(data)
             if (session) {
                 const userData = await authService.getCurrentUser()
-                if(userData) dispatch(authLogin(userData));
+                if(userData) dispatch(authLogin({ userData: serializeUser(userData) }));
                 navigate("/")
             }
         } catch (error) {
